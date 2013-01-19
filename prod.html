@@ -1,0 +1,205 @@
+<style>
+.axis path,
+.axis line,
+.bar line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.bar line {
+  stroke: #ccc;
+}
+
+.x.axis path {
+}
+</style>
+<script src="<? echo STATIC_URL; ?>/assets/js/d3.v3.min.js"></script>
+<script>
+
+/*
+  This expects an object with the following setup:
+
+  {
+
+    title: // graph title
+    date: // graph date  "January 2013"
+    data: // graph data
+    minimum: // minimum X axis value to show, defaults to 0
+    color: // bar color
+  }
+ 
+*/
+var makeD3 = function (graph) {
+
+  var data = graph.data;
+
+  var margin = { top: 50, right: 20, bottom: 30, left: 40 },
+    width = 790 - margin.left - margin.right,
+    height = 230 - margin.top - margin.bottom;
+
+  var x = d3.scale.ordinal()
+      .rangeRoundBands([0, width], .1);
+
+  var y = d3.scale.linear()
+      .range([height, 0]);
+
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .tickFormat(d3.format("s"))
+      .orient("left");
+
+  var svg = d3.select('#root').append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+ 
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+
+  x.domain(data.map(function(d) { return d.day; }));
+  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+  //y.domain(d3.extent(data, function(d) { return d.value; }));
+
+  // Setup axis
+  svg.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0, ' + height + ')')
+      .style('font-size', '9px')
+      .call(xAxis);
+
+  svg.append('g')
+      .attr('class', 'y axis')
+      .style('font-size', '9px')
+      .call(yAxis);
+
+  // Add a g container for every chart bar
+  var bars = svg.selectAll('g.bar')
+      .data(data.filter(function(d, i, o) { return d.value != 0; }))
+    .enter().append('g')
+      .attr('class', 'bar');
+
+  // Add a line to tie value and chart bar
+  bars.append('line')
+      .attr("x1", x)
+      .attr("x2", x)
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr('transform', function (d) { return 'translate(' + ( x(d.day) )  +')'; });
+
+  // Add the bars
+  bars.append("rect")
+      .attr("class", "bar")
+      .style('fill', graph.color)
+      .attr("x", function(d) { return x(d.day); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); });
+
+  // Add value labels to every bar
+  var my_label_transform = function (d) {
+    console.log('length: ' + d.value.toString().length);
+    var pad_x = (5 * d.value.toString().length) - 15;
+    var pad_y = (-5 * d.value.toString().length) + 20;
+    var translate_x = x(d.day) + x.rangeBand() + pad_x;
+    var translate_y = -15 + pad_y;
+
+    return 'translate(' + translate_x + ' ' + translate_y +') rotate(-45)';
+  };
+
+  var my_label_formatter = function (d) {
+    return d.value;
+    return d.value != 0 ? my_formatter(d.value) : '';
+  };
+
+  bars.append('text')
+    .attr("font-family", "arial")
+    .attr("font-size", "10px")
+    .attr('text-anchor', 'end')
+    .attr('fill', 'black')
+    .style('font-weight', 'bold')
+    //.attr('transform', function (d) { return 'translate(' + (x(d.day) + x.rangeBand() + 5) + ' ' + (-15) +') rotate(-45)'; })
+    .attr('transform', my_label_transform)
+    .text(my_label_formatter);
+  
+  // Add a g container for the graph label
+  var label = svg.append('g')
+      .attr('transform', 'translate(0 -40)');
+
+  var label_text = label.append('text').text(graph.title);
+  
+  // Get bounding box to use as reference  
+  var label_text_bb = label_text.node().getBBox();
+  
+  // Add current month and year to label
+  label.append('text').text(graph.date)
+      .attr('transform', 'translate(' + (label_text_bb.width+20) + ')')
+      .style('font-weight', 'bold');
+
+  console.log(getTickInterval(data));
+}
+
+
+/**
+ * Algorithm taken from custom_classes/Image/Graph/Axis.php
+ */
+var getTickInterval = function (data) {
+  var accessor = function (d, i) { return d.value; };
+
+  var max = d3.max(data, accessor),
+      min = 0,
+      interval = 1;
+
+  var span = Math.abs(max - min);
+ 
+    console.log('here');
+  if (min && max && (min > max)) {
+
+    return 1;
+  }
+
+  if (span) {
+    var interval = Math.pow( 10, Math.floor(Math.log(span) / Math.LN10) );
+    console.log(interval); 
+    if (interval == 0) {
+      interval = 1;
+    }
+
+    if (((span) / interval) < 3 ) {
+      interval = interval / 4;
+    } else if (((span) / interval) < 5) {
+      interval = interval / 2;
+    } else if (((span) / interval) > 10) {
+      interval = interval * 2;
+    }
+
+    if ((interval -Math.floor(interval) == 0.5) && (interval != 0.5)) {
+      interval = Math.floor(interval);
+    }
+
+    if (interval == 0) {
+      interval = (span) / 5;
+    }
+
+    if (interval == 0) {
+      interval = 1;
+    }
+  }
+
+  return interval;
+}
+
+</script>
