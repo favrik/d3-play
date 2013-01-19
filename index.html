@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var margin = {top: 50, right: 20, bottom: 30, left: 40},
+    width = 790 - margin.left - margin.right,
+    height = 230 - margin.top - margin.bottom;
+
+var formatPercent = d3.format(".0%");
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .tickFormat(d3.format("s"))
+    .orient("left");
+
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+var data = [{letter: 'A', frequency: 0}, {letter: 'B', frequency: 0}, {letter: 'C', frequency: 10000}];
+var data = [{"day":1,"value":0},{"day":2,"value":0},{"day":3,"value":0},{"day":4,"value":0},{"day":5,"value":0},{"day":6,"value":0},{"day":7,"value":0},{"day":8,"value":0},{"day":9,"value":0},{"day":10,"value":0},{"day":11,"value":0},{"day":12,"value":"10301"},{"day":13,"value":0},{"day":14,"value":0},{"day":15,"value":0},{"day":16,"value":0},{"day":17,"value":0},{"day":18,"value":0},{"day":19,"value":0},{"day":20,"value":0},{"day":21,"value":0},{"day":22,"value":0},{"day":23,"value":0},{"day":24,"value":0},{"day":25,"value":0},{"day":26,"value":0},{"day":27,"value":0},{"day":28,"value":0},{"day":29,"value":0},{"day":30,"value":0},{"day":31,"value":0}];
+
+var data = [{"day":1,"value":12388},{"day":2,"value":11809},{"day":3,"value":12328},{"day":4,"value":12112},{"day":5,"value":12754},{"day":6,"value":12732},{"day":7,"value":10025},{"day":8,"value":11228},{"day":9,"value":10035},{"day":10,"value":10082},{"day":11,"value":10844},{"day":12,"value":10093},{"day":13,"value":10720},{"day":14,"value":13099},{"day":15,"value":13249},{"day":16,"value":13348},{"day":17,"value":11248},{"day":18,"value":12353},{"day":19,"value":12836},{"day":20,"value":12048},{"day":21,"value":10381},{"day":22,"value":10804},{"day":23,"value":13377},{"day":24,"value":13383},{"day":25,"value":10880},{"day":26,"value":12156},{"day":27,"value":12357},{"day":28,"value":12544},{"day":29,"value":12774},{"day":30,"value":13297},{"day":31,"value":11510}];
+var data = [{"day":1,"value":620108},{"day":2,"value":625229},{"day":3,"value":637040},{"day":4,"value":594384},{"day":5,"value":666727},{"day":6,"value":627274},{"day":7,"value":610421},{"day":8,"value":606789},{"day":9,"value":661933},{"day":10,"value":591410},{"day":11,"value":597195},{"day":12,"value":640569},{"day":13,"value":633792},{"day":14,"value":594561},{"day":15,"value":622218},{"day":16,"value":625024},{"day":17,"value":661162},{"day":18,"value":596844},{"day":19,"value":587348},{"day":20,"value":616522},{"day":21,"value":599687},{"day":22,"value":596284},{"day":23,"value":633843},{"day":24,"value":665891},{"day":25,"value":618318},{"day":26,"value":635390},{"day":27,"value":669831},{"day":28,"value":666124},{"day":29,"value":597379},{"day":30,"value":631109},{"day":31,"value":587692}];
+
+var data = [{"day":1,"value":14.6},{"day":2,"value":14},{"day":3,"value":13},{"day":4,"value":14.6},{"day":5,"value":14.2},{"day":6,"value":13.9},{"day":7,"value":13.8},{"day":8,"value":15.4},{"day":9,"value":13.3},{"day":10,"value":13.9},{"day":11,"value":13.3},{"day":12,"value":14.2},{"day":13,"value":14.6},{"day":14,"value":13.1},{"day":15,"value":13.5},{"day":16,"value":15.4},{"day":17,"value":13.6},{"day":18,"value":14.1},{"day":19,"value":14},{"day":20,"value":13.8},{"day":21,"value":15.4},{"day":22,"value":13},{"day":23,"value":14.7},{"day":24,"value":14.6},{"day":25,"value":15},{"day":26,"value":13.1},{"day":27,"value":13.8},{"day":28,"value":14.6},{"day":29,"value":14.2},{"day":30,"value":14.3},{"day":31,"value":13.2}];
+
+//d3.tsv("data.tsv", function(error, data) {
+//data.forEach(data, function (d) { d.
+
+x.domain(data.map(function(d) { return d.day; }));
+//y.domain([12, d3.max(data, function(d) { return d.value; })]);
+y.domain(d3.extent(data, function(d) { return d.value; }));
+
+svg.append('g')
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0, ' + height + ')')
+    .style('font-size', '9px')
+    .call(xAxis);
+
+svg.append('g')
+    .attr('class', 'y axis')
+    .style('font-size', '9px')
+    .call(yAxis)
+// [favrik] returns a 
+var bars = svg.selectAll('g.bar')
+    .data(data)
+  .enter().append('g')
+    .attr('class', 'bar');
+
+bars.append('line')
+    .attr("x1", x)
+    .attr("x2", x)
+    .attr("y1", 0)
+    .attr("y2", height)
+    .style("stroke", "#aaa")
+    .style('stroke-width', 1)
+    .attr('transform', function (d) { return 'translate(' + ( x(d.day) )  +')'; })
+
+bars.append("rect")
+    .attr("class", "bar")
+    .attr("x", function(d) { return x(d.day); })
+    .attr("width", x.rangeBand())
+    .attr("y", function(d) { return y(d.value); })
+    .attr("height", function(d) { return height - y(d.value); });
+
+//var the_x = function (d, i) { return x(d.day) + 10;
+
+bars.append('text')
+//  .attr('x', function (d) { return x(d.day); })
+//  .attr('y', function (d) { return y(d.value); })
+  .attr("font-family", "arial")
+  .attr("font-size", "10px")
+  .attr('text-anchor', 'end')
+  .attr('fill', 'black')
+  .style('font-weight', 'bold')
+  .attr('transform', function (d) { return 'translate(' + (x(d.day) + x.rangeBand() + 5) + ' ' + (-15) +') rotate(-45)'; })
+  .text(function (d) { return d.value; })
+  
+var label = svg.append('g')
+    .attr('transform', 'translate(0 -40)');
+    
+    
+var te=  label.append('text')
+    .text('Total Daily Peak Users')
+    
+  var tebb = te.node().getBBox();
+  
+  label.append('text').text('Jan 2013').attr('transform', 'translate(' + (tebb.width+20) + ')').style('font-weight', 'bold')
+    
+//  .attr('transform', function (d) { return 'translate(' + x(d.value) + ' 0)rotate(-45)'; });
+  
+/*
+svg.selectAll('text') 
+    .data(data)
+  .enter().append('text')
+    .attr('x', function (d, i) { return x(d.day) + 10; })
+    .attr('y', function (d) { return y(d.value) + 10; })
+    .attr("font-family", "arial")
+    .attr("font-size", "9px")
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'white')
+    .style('font-weight', 'bold')
+    .text(function (d) { return d.value; });
+*/
+
+
+    
+
+
+//});
+
+</script>
